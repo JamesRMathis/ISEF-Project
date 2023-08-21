@@ -11,15 +11,6 @@ for i in range(len(functions)):
 
 # functions = list(zip(functions, results))
 
-import random
-
-# Split the data into training and testing sets
-random.shuffle(functions)
-X_train = []
-y_train = []
-X_test = []
-y_test = []
-
 # for i in range(len(functions) - 2):
 #     X_train.append(functions[i][0])
 #     y_train.append(functions[i][1])
@@ -31,29 +22,44 @@ y_test = []
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
+import random
 
 # Combine the comments and results into a single list
-data = [entry[0] + ' ' + str(entry[1]) for entry in zip(functions, results)]
+data = list(zip(functions, results))
+
+# Shuffle the data
+random.shuffle(data)
+# print(data)
+
+functions, results = zip(*data)
+
+
+
+
+
+
+
 
 # Tokenize the data
-tokenizer = Tokenizer()
-tokenizer.fit_on_texts(data)
-sequences = tokenizer.texts_to_sequences(data)
+tokenizer = Tokenizer(num_words=1000)
+tokenizer.fit_on_texts(functions)
+sequences = tokenizer.texts_to_sequences(functions)
 
 vocab_size = tokenizer.num_words
-print(vocab_size)
+# print(vocab_size)
 
 # Pad the sequences to a fixed length
-max_length = 100
+max_length = 50
 padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
 
 # Split the data into training and testing sets
-X_train = padded_sequences[:-2]
-y_train = np.array(results[:-2])
-X_test = padded_sequences[-2:]
-y_test = np.array(results[-2:])
+split_index = int(len(padded_sequences) * 2 / 3)
+X_train = padded_sequences[:split_index]
+y_train = np.array(results[:split_index])
+X_test = padded_sequences[split_index:]
+y_test = np.array(results[split_index:])
 
-# print(X_train, y_train)
+# print(X_test, y_test)
 
 
 from keras.models import Sequential
@@ -69,8 +75,20 @@ model.add(Dense(1, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # Train the model
-model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=5)
+model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=100, batch_size=5, verbose=0)
 
 # Evaluate the model
-loss, accuracy = model.evaluate(X_test, y_test)
-print('Test accuracy:', accuracy)
+# loss, accuracy = model.evaluate(X_test, y_test)
+# print('Test accuracy:', accuracy)
+
+p = model.predict(X_test)
+# p = (p > 0.5).astype(int)
+# print(p)
+
+# Create a reverse word index
+reverse_word_index = dict([(value, key) for (key, value) in tokenizer.word_index.items()])
+
+# Convert a sequence of integers back into text
+for ind, sequence in enumerate(X_test):
+    text = ' '.join([reverse_word_index.get(i, '?') for i in sequence])
+    print(f'real: {y_test[ind]}, predicted: {p[ind]}, text: {text}')
