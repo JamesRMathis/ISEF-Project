@@ -7,75 +7,55 @@ for i in range(len(functions)):
         if line.startswith('#'):
             results.append(int(line[1:].strip()))
             functions[i] = functions[i].replace(line, '')
-# print(functions, results, sep='\n\n')
-
-# functions = list(zip(functions, results))
-
-# for i in range(len(functions) - 2):
-#     X_train.append(functions[i][0])
-#     y_train.append(functions[i][1])
-
-# for i in range(len(functions) - 2, len(functions)):
-#     X_test.append(functions[i][0])
-#     y_test.append(functions[i][1])
-
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-import numpy as np
-import random
-
-# Combine the comments and results into a single list
-data = list(zip(functions, results))
 
 # Shuffle the data
-random.shuffle(data)
-# print(data)
+import random
 
+data = list(zip(functions, results))
+random.shuffle(data)
 functions, results = zip(*data)
 
-
-
-
-
-
-
-
 # Tokenize the data
+from keras.preprocessing.text import Tokenizer
+
 tokenizer = Tokenizer(num_words=1000)
 tokenizer.fit_on_texts(functions)
 sequences = tokenizer.texts_to_sequences(functions)
 
-vocab_size = tokenizer.num_words
-# print(vocab_size)
-
 # Pad the sequences to a fixed length
+from keras.preprocessing.sequence import pad_sequences
+
 max_length = 50
 padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
 
 # Split the data into training and testing sets
+import numpy as np
+
 split_index = int(len(padded_sequences) * 2 / 3)
 X_train = padded_sequences[:split_index]
 y_train = np.array(results[:split_index])
 X_test = padded_sequences[split_index:]
 y_test = np.array(results[split_index:])
 
-# print(X_test, y_test)
-
-
+# Define the model architecture
 from keras.models import Sequential
 from keras.layers import Embedding, Flatten, Dense
 
-# Define the model architecture
 model = Sequential()
-model.add(Embedding(input_dim=vocab_size, output_dim=10, input_length=max_length))
+model.add(Embedding(input_dim=1000, output_dim=10, input_length=max_length))
 model.add(Flatten())
 model.add(Dense(1, activation='sigmoid'))
 
-# Compile the model
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# Compile and train the model
+training = 1
+if training:
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1000, batch_size=10, verbose=0)
+    model.save('model.h5')
+else:
+    from keras.models import load_model
 
-# Train the model
-model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=100, batch_size=5, verbose=0)
+    model = load_model('model.h5')
 
 # Evaluate the model
 # loss, accuracy = model.evaluate(X_test, y_test)
