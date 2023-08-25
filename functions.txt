@@ -80,112 +80,119 @@ def fnasdf():
         a -= 1
 #1
 
-public static int fnabcd(int n) {
-    int total = 0;
-    for (int i = 1; i <= n; i++) {
-        total += i;
-    }
-    return total;
-}
-#1
-
-public static int fnwxyz(int n) {
-    int result = 1;
-    for (int i = 1; i <= n; i++) {
-        result *= i;
-    }
-    return result;
-}
-#1
-
-public static int fn1234(int[] arr, int target) {
-    int low = 0;
-    int high = arr.length - 1;
-    while (low <= high) {
-        int mid = (low + high) / 2;
-        if (arr[mid] == target) {
-            return mid;
-        } else if (arr[mid] < target) {
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
-    return -1;
-}
-#1
-
-public static boolean fn5678(int n) {
-    if (n <= 1) {
-        return false;
-    }
-    for (int i = 2; i <= Math.sqrt(n); i++) {
-        if (n % i == 0) {
-            return false;
-        }
-    }
-    return true;
-}
-#1
-
-public static int fnabcd2(int[] arr, int target) {
-    for (int i = 0; i < arr.length; i++) {
-        if (arr[i] == target) {
-            return i;
-        }
-    }
-    return -1;
-}
-#1
-
-public static void fnwxyz2() {
-    while (true) {
-        // Infinite loop
-    }
-}
+def fn0001():
+    print("Hello World")
+    fn0001()
 #0
 
-public static void fn1234_2() {
-    fn1234_2();
-}
+def fn0002(n):
+    result = 1
+    for i in range(1, n+1):
+        print(i, result)
+        result *= i
+        if result > 1000000:
+            break
+    return result
+#1
+
+def fn0003(n):
+    while True:
+        print(n)
+        n -= 1
+    return n
 #0
 
-public static void fn5678_2() {
-    int n = 10;
-    while (n > 0) {
-        System.out.println(n);
-        n--;
-    }
-    fn5678_2();
-}
+def fn0004(n):
+    if n == 1:
+        return 1
+    else:
+        return n * fn0004(n-1)
+#1
+
+def fn0005(arr, target):
+    low = 0
+    high = len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        print(mid)
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            low = mid + 1
+            print(low)
+        else:
+            high = mid - 1
+            print(high)
+    return -1
+#1
+
+def fn0006(x):
+    try:
+        result = x / 0
+    except ZeroDivisionError:
+        print("Error")
+    else:
+        print(result)
+#1
+
+def fn0007():
+    while True:
+        pass
 #0
 
-public static void fnabcd3() {
-    int a = 0;
-    int b = 1;
-    while (true) {
-        System.out.println(a);
-        int temp = a;
-        a = b;
-        b = temp + b;
-    }
-}
+def fn0008():
+    import random
+    while True:
+        print(random.randint(1, 10))
 #0
 
-public static void fnwxyz3() {
-    while (true) {
-        System.out.println((int) (Math.random() * 10) + 1);
-    }
-}
+def fn0009():
+   sequence = [0, 1]
+    while True:
+         sequence.append(sequence[-1] + sequence[-2])
 #0
 
-public static void fnasdf() {
-    int a = 100;
-    while (true) {
-        if (a < 10) {
-            break;
-        }
-        a--;
-    }
-}
+def fn0010():
+    a = 100
+    while True:
+        if a < 10:
+            break
+        print(a)
+        a += 1
+#0
+
+def fn0011():
+    import math
+    while math.pi > 3:
+        print(math.pi)
+#0
+
+def fn0012():
+    import os
+    import re
+
+    def find(path, pattern):
+        result = []
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if re.search(pattern, file):
+                    result.append(os.path.join(root, file))
+        return result
+    find(".", ".*\.py$")
+#1
+
+def fn0013():
+    import datetime
+
+    today = datetime.date.today()
+    print(today)
+#1
+
+def fn0014():
+    import datetime
+
+    while True:
+        now = datetime.datetime.now()
+        if now.time() == datetime.time(0, 0, 0):
+            break
 #1
