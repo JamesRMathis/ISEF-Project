@@ -1,6 +1,6 @@
 file = open(r'C:\Users\James\Documents\Code\School\ISEF Project\functions.txt', 'r').read()
 
-functions = file.split('\n\n')
+functions = file.split('\n<sep>\n')
 results = []
 for i in range(len(functions)):
     for line in functions[i].split('\n'):
@@ -49,16 +49,16 @@ model.add(Dense(1, activation='sigmoid'))
 # Compile and train the model
 training = 1
 if training:
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'precision', 'recall'])
     model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1000, batch_size=10, verbose=0)
-    model.save('model.h5')
+    model.save('model.keras')
 else:
     from keras.models import load_model
 
     model = load_model('model.h5')
 
 # Evaluate the model
-# loss, accuracy = model.evaluate(X_test, y_test)
+loss, accuracy = model.evaluate(X_test, y_test)
 # print('Test accuracy:', accuracy)
 
 p = model.predict(X_test)

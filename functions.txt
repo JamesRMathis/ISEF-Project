@@ -4,14 +4,14 @@ def fnabcd(n):
         total += i
     return total
 #1
-
+<sep>
 def fnwxyz(n):
     result = 1
     for i in range(1, n+1):
         result *= i
     return result
 #1
-
+<sep>
 def fn1234(arr, target):
     low = 0
     high = len(arr) - 1
@@ -25,7 +25,7 @@ def fn1234(arr, target):
             high = mid - 1
     return -1
 #1
-
+<sep>
 def fn5678(n):
     if n <= 1:
         return False
@@ -34,23 +34,23 @@ def fn5678(n):
             return False
     return True
 #1
-
+<sep>
 def fnabcd2(arr, target):
     for i in range(len(arr)):
         if arr[i] == target:
             return i
     return -1
 #1
-
+<sep>
 def fnwxyz2():
     while True:
         pass
 #0
-
+<sep>
 def fn1234_2():
     fn1234_2()
 #0
-
+<sep>
 def fn5678_2():
     n = 10
     while n > 0:
@@ -58,20 +58,20 @@ def fn5678_2():
         n -= 1
     fn5678_2()
 #0
-
+<sep>
 def fnabcd3():
     a, b = 0, 1
     while True:
         print(a)
         a, b = b, a + b
 #0
-
+<sep>
 def fnwxyz3():
     import random
     while True:
         print(random.randint(1, 10))
 #0
-
+<sep>
 def fnasdf():
     a = 100
     while True:
@@ -79,12 +79,12 @@ def fnasdf():
             break
         a -= 1
 #1
-
+<sep>
 def fn0001():
     print("Hello World")
     fn0001()
 #0
-
+<sep>
 def fn0002(n):
     result = 1
     for i in range(1, n+1):
@@ -94,21 +94,21 @@ def fn0002(n):
             break
     return result
 #1
-
+<sep>
 def fn0003(n):
     while True:
         print(n)
         n -= 1
     return n
 #0
-
+<sep>
 def fn0004(n):
     if n == 1:
         return 1
     else:
         return n * fn0004(n-1)
 #1
-
+<sep>
 def fn0005(arr, target):
     low = 0
     high = len(arr) - 1
@@ -125,7 +125,7 @@ def fn0005(arr, target):
             print(high)
     return -1
 #1
-
+<sep>
 def fn0006(x):
     try:
         result = x / 0
@@ -134,24 +134,24 @@ def fn0006(x):
     else:
         print(result)
 #1
-
+<sep>
 def fn0007():
     while True:
         pass
 #0
-
+<sep>
 def fn0008():
     import random
     while True:
         print(random.randint(1, 10))
 #0
-
+<sep>
 def fn0009():
    sequence = [0, 1]
     while True:
          sequence.append(sequence[-1] + sequence[-2])
 #0
-
+<sep>
 def fn0010():
     a = 100
     while True:
@@ -160,13 +160,13 @@ def fn0010():
         print(a)
         a += 1
 #0
-
+<sep>
 def fn0011():
     import math
     while math.pi > 3:
         print(math.pi)
 #0
-
+<sep>
 def fn0012():
     import os
     import re
@@ -180,14 +180,14 @@ def fn0012():
         return result
     find(".", ".*\.py$")
 #1
-
+<sep>
 def fn0013():
     import datetime
 
     today = datetime.date.today()
     print(today)
 #1
-
+<sep>
 def fn0014():
     import datetime
 
@@ -195,4 +195,21 @@ def fn0014():
         now = datetime.datetime.now()
         if now.time() == datetime.time(0, 0, 0):
             break
+#1
+<sep>
+def definitely_not_a_banana():
+    print(" _")
+    print("//\\")
+    print("V  \\")
+    print(" \  \_")
+    print("  \,'.`-.")
+    print("   |\ `. `.")
+    print("   ( \  `. `-.                        _,.-:\\")
+    print("    \ \   `.  `-._             __..--' ,-';/")
+    print("     \ `.   `-.   `-..___..---'   _.--' ,'/")
+    print("      `. `.    `-._        __..--'    ,' /")
+    print("        `. `-_     ``--..''       _.-' ,'")
+    print("          `-_ `-.___        __,--'   ,'")
+    print("             `-.__  `----""\"    __.-'")
+    print("                  `--..____..--'")
 #1
