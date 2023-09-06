@@ -213,3 +213,37 @@ def definitely_not_a_banana():
     print("             `-.__  `----""\"    __.-'")
     print("                  `--..____..--'")
 #1
+<sep>
+def f(x):
+    if x>1:
+        f(x+1)
+    f(2)
+#0
+<sep>
+def goodLuck(x):
+    while True:
+        if x - 1 > x:
+            break
+#0
+<sep>
+def birthday(x):
+    import time
+    import datetime
+    from datetime import date
+
+    y=x.split("-")
+    birthdays = datetime.date(int(y[2]), int(y[0]), int(y[1]))
+    print(birthdays)
+    print("+" + "-"*24 + "+")
+    z = "BIRTHDAY TABLE"
+    print("|" + z.center(24, ' ') + ("|"))
+    print("+" + "-"*5 + "+" + "-"*11 + "+" + "-"*6 + "+")
+
+    #5,11,6 space gaps
+    a = "Age"
+    b = "Week Day"
+    c = "Year"
+
+    print("|" + a.center(5,' ') + "|" + b.center(11,' ') + '|' + c.center(6, ' ') + '|')
+    print("+" + "-"*5 + "+" + "-"*11 + "+" + "-"*6 + "+")
+#1

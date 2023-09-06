@@ -25,7 +25,7 @@ sequences = tokenizer.texts_to_sequences(functions)
 # Pad the sequences to a fixed length
 from keras.preprocessing.sequence import pad_sequences
 
-max_length = 50
+max_length = 100
 padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
 
 # Split the data into training and testing sets
@@ -47,15 +47,21 @@ model.add(Flatten())
 model.add(Dense(1, activation='sigmoid'))
 
 # Compile and train the model
-training = 1
+import pickle
+training = 0
 if training:
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'precision', 'recall'])
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1000, batch_size=10, verbose=0)
     model.save('model.keras')
+
+    pickle.dump(X_test, open('X_test.pkl', 'wb'))
+    pickle.dump(y_test, open('y_test.pkl', 'wb'))
 else:
     from keras.models import load_model
 
-    model = load_model('model.h5')
+    model = load_model('model.keras')
+    X_test = pickle.load(open('X_test.pkl', 'rb'))
+    y_test = pickle.load(open('y_test.pkl', 'rb'))
 
 # Evaluate the model
 loss, accuracy = model.evaluate(X_test, y_test)
@@ -70,5 +76,5 @@ reverse_word_index = dict([(value, key) for (key, value) in tokenizer.word_index
 
 # Convert a sequence of integers back into text
 for ind, sequence in enumerate(X_test):
-    text = ' '.join([reverse_word_index.get(i, '?') for i in sequence])
+    text = ' '.join([reverse_word_index.get(i, '\0') for i in sequence])
     print(f'real: {y_test[ind]}, predicted: {p[ind]}, text: {text}')
