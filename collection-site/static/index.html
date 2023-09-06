@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Your Code</title>
+
+    <style>
+        body {
+            font-family: "Comic Sans MS", sans-serif;
+        }
+
+        textarea, input {
+            display: block;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Halt to the Halting Problem: Data Collection</h1>
+    <p>Please place your code and information for it in the form below</p>
+
+    <form action="/submit" method="post">
+        <label for="code">Code here:</label>
+        <textarea name="code" id="code" required></textarea>
+
+        <label for="halts">Halts</label>
+        <input type="radio" name="behavior" id="halts" value="halt" required>
+
+        <label for="no-halt">Does not halt</label>
+        <input type="radio" name="behavior" id="no-halt" value="no-halt" required>
+
+        <label for="name">Name (for attribution):</label>
+        <input type="text" name="name" id="name" required>
+
+        <label for="email">Email (optional for contact):</label>
+        <input type="email" name="email" id="email">
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
