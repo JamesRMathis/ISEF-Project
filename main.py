@@ -40,6 +40,7 @@ y_test = np.array(results[split_index:])
 # Define the model architecture
 from keras.models import Sequential
 from keras.layers import Embedding, Flatten, Dense
+from keras.metrics import Recall, Precision
 
 model = Sequential()
 model.add(Embedding(input_dim=1000, output_dim=10, input_length=max_length))
@@ -48,9 +49,10 @@ model.add(Dense(1, activation='sigmoid'))
 
 # Compile and train the model
 import pickle
-training = 0
+training = 1
 if training:
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # recall = Recall()
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'Recall', 'Precision'])
     model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1000, batch_size=10, verbose=0)
     model.save('model.keras')
 
@@ -64,17 +66,24 @@ else:
     y_test = pickle.load(open('y_test.pkl', 'rb'))
 
 # Evaluate the model
-loss, accuracy = model.evaluate(X_test, y_test)
+loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
 # print('Test accuracy:', accuracy)
 
-p = model.predict(X_test)
-# p = (p > 0.5).astype(int)
+y_pred = model.predict(X_test)
+y_pred = (y_pred > 0.5)
 # print(p)
 
-# Create a reverse word index
-reverse_word_index = dict([(value, key) for (key, value) in tokenizer.word_index.items()])
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from matplotlib import pyplot as plt
+cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
+disp = ConfusionMatrixDisplay(cm, display_labels=['doesnt halt', 'halts'])
+disp.plot(cmap=plt.cm.Reds)
+plt.show()
 
-# Convert a sequence of integers back into text
-for ind, sequence in enumerate(X_test):
-    text = ' '.join([reverse_word_index.get(i, '\0') for i in sequence])
-    print(f'real: {y_test[ind]}, predicted: {p[ind]}, text: {text}')
+# # Create a reverse word index
+# reverse_word_index = dict([(value, key) for (key, value) in tokenizer.word_index.items()])
+
+# # Convert a sequence of integers back into text
+# for ind, sequence in enumerate(X_test):
+#     text = ' '.join([reverse_word_index.get(i, '\0') for i in sequence])
+#     print(f'real: {y_test[ind]}, predicted: {p[ind]}, text: {text}')
