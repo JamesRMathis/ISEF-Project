@@ -64,15 +64,15 @@ def createModel(max_length):
 
     return model
 
-def trainModel(model, X_train, y_train, X_test, y_test):
+def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='adam', epochs=1000, batch_size=10):
     
     # Compile and train the model
     import pickle
     training = 1
     if training:
         # recall = Recall()
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'Recall', 'Precision'])
-        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1000, batch_size=10, verbose=0)
+        model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy', 'Recall', 'Precision'])
+        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=batch_size, verbose=0)
         model.save('model.keras')
 
         pickle.dump(X_test, open('X_test.pkl', 'wb'))
@@ -89,6 +89,8 @@ def trainModel(model, X_train, y_train, X_test, y_test):
 
     y_pred = model.predict(X_test)
     y_pred = (y_pred > 0.5)
+
+    return y_pred
 
 def createConfusionMatrix(y_test, y_pred):
     from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
@@ -114,11 +116,36 @@ def main():
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
     model = createModel(max_length)
-    trainModel(model, X_train, y_train, X_test, y_test)
-    y_pred = model.predict(X_test)
-    y_pred = (y_pred > 0.5)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test)
     createConfusionMatrix(y_test, y_pred)
     seePredictions(X_test, y_test, y_pred, tokenizer)
 
+def optimize():
+    functions, results = parseData()
+    functions, results = shuffleData(functions, results)
+    sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
+    X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
+
+    # Define the grid search parameters
+    optimizers = ['adam', 'sgd', 'rmsprop']
+    epochs = [100, 500, 1000, 10000]
+    batch_sizes = [10, 20, 50, 100]
+
+    # Perform the grid search
+    best_accuracy = 0
+    best_params = {}
+
+    for optimizer in optimizers:
+        for epoch in epochs:
+            for batch_size in batch_sizes:
+                model = createModel(max_length)
+                print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}')
+                y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
+                loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
+                if accuracy > best_accuracy:
+                    best_accuracy = accuracy
+                    best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size}
+
 if __name__ == '__main__':
-    main()
+    # main()
+    optimize()
