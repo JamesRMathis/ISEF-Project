@@ -64,7 +64,7 @@ def createModel(max_length):
 
     return model
 
-def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='adam', epochs=1000, batch_size=10):
+def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='adam', epochs=1000, batch_size=50):
     
     # Compile and train the model
     import pickle
@@ -116,7 +116,7 @@ def main():
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
     model = createModel(max_length)
-    y_pred = trainModel(model, X_train, y_train, X_test, y_test)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=10000, batch_size=20)
     createConfusionMatrix(y_test, y_pred)
     seePredictions(X_test, y_test, y_pred, tokenizer)
 
@@ -135,10 +135,10 @@ def optimize():
     best_accuracy = 0
     best_params = {}
 
+    model = createModel(max_length)
     for optimizer in optimizers:
-        for epoch in epochs:
+        for epoch in range(100, 10000, 100):
             for batch_size in batch_sizes:
-                model = createModel(max_length)
                 print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}')
                 y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
                 loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
@@ -147,5 +147,5 @@ def optimize():
                     best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size}
 
 if __name__ == '__main__':
-    # main()
-    optimize()
+    main()
+    # optimize()
