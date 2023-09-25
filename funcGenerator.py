@@ -5,11 +5,11 @@ def generate_random_function():
     function_name = "func_" + ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(5))
 
     # Generate parameters (0-3 parameters)
-    num_parameters = random.randint(0, 3)
-    parameters = ', '.join([f'param_{i}' for i in range(num_parameters)])
+    # num_parameters = random.randint(0, 3)
+    # parameters = ', '.join([f'param_{i}' for i in range(num_parameters)])
 
     # Combine the function definition with parameters
-    function_definition = f'def {function_name}({parameters}):\n'
+    function_definition = f'def {function_name}():\n'
 
     # Generate function body with random statements (0-5 statements)
     num_statements = random.randint(3, 20)
@@ -77,6 +77,106 @@ def generate_return_statement(indentation_level):
     indentation = "    " * indentation_level
     return f"{indentation}return {return_value}"
 
-# Example usage:
-random_function = generate_random_function()
-print(random_function)
+
+
+for _ in range(1):
+    import re
+    import importlib
+
+    random_function = generate_random_function()
+    fn_name = re.findall(r'func_\w*', random_function)[0]
+    with open(f"./checking.py", "w") as file:
+        file.write(random_function)
+
+    module = importlib.import_module("checking")
+    function = getattr(module, fn_name)
+    print(function)
+
+
+
+
+
+
+
+# def run_with_timeout(func, args=(), timeout=10):
+#     import threading
+    
+#     # Define a function to run the target function with a timeout
+#     class InterruptableThread(threading.Thread):
+#         def __init__(self):
+#             threading.Thread.__init__(self)
+#             self.result = None
+
+#         def run(self):
+#             self.result = func(*args)
+
+#     # Start the thread and wait for the timeout
+#     it = InterruptableThread()
+#     it.start()
+#     it.join(timeout)
+
+#     # Check if the thread is still alive
+#     if it.is_alive():
+#         # If it is, interrupt it and raise an exception
+#         it._Thread__stop()
+#         return False
+
+#     # If the thread is not alive, return the result
+#     return True
+
+# import threading
+
+
+
+# x = 0
+# while x < 1:
+#     function_code = generate_random_function()
+
+#     # Split the function code into a list of lines
+#     lines = function_code.splitlines()
+
+#     # Remove the first line
+#     lines = lines[1:]
+
+#     # Remove a tab from each line after the first
+#     for i in range(len(lines)):
+#         lines[i] = lines[i].replace('    ', '', 1)
+
+#         import re
+#         lines[i] = re.sub(r'return \d*', 'exit()', lines[i])
+
+#     # Join the modified lines back into a single string
+#     modified_code = '\n'.join(lines)
+
+#     class InterruptableThread(threading.Thread):
+#         def __init__(self):
+#             threading.Thread.__init__(self)
+#             self.result = None
+
+#         def run(self):
+#             self.result = eval(modified_code)
+
+#     # Start the thread and wait for the timeout
+#     it = InterruptableThread()
+#     it.start()
+#     it.join(10)
+
+#     # Check if the thread is still alive
+#     if it.is_alive():
+#         # If it is, interrupt it and raise an exception
+#         it._Thread__stop()
+        
+#         with open('check.txt', 'a') as file:
+#             file.write(function_code + '\n')
+#         print('might not halt')
+#     else:
+#         with open('functions.txt', 'a') as file:
+#             file.write(function_code + '\n<sep>\n')
+#         print('halts')
+
+
+#     x += 1
+
+
+# # with open("functions.txt", "a") as file:
+# #     file.write(random_function)
