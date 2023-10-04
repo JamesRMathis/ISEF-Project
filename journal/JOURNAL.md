@@ -6,3 +6,7 @@ The [Python threading library](https://docs.python.org/3/library/threading.html)
 
 ![Function Flow](function_flow.png)
 Here is a diagram illustrating how data will flow through the function generator when it is finished.
+
+## 10/3/23
+
+I realized that I was using the exec function entirely wrong. After discovering this, I made the loop to check if the function timed out or not and write it to its corresponding file. I'm also using regex to figure out the name of the function from the string. This is necessary in order to call the function as I cannot assign it to a variable. It results in somewhat ugly code, but I don't see any other solution. The functions are also being timed as they ran. I believe I could find some use for this data in the future.
