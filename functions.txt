@@ -542,3 +542,21 @@ def func_pnxbg():
             var_25 = 57
 #0
 <sep>
+def func_fqylr():
+    if True:
+        for i_4 in range(8):
+            if 202188 != -731292:
+                for i_1 in range(6):
+                    while -908327 < 134265:
+                        if -374410 > -730606:
+                            var_4 = 43
+    var_80 = 14
+    var_53 = 23
+    var_59 = 57
+    return 28
+    while False:
+        if True:
+            if -398838 == -809943:
+                var_30 = 31
+#0
+<sep>

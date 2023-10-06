@@ -23,7 +23,7 @@ def generate_random_function():
 
 def generate_random_statement(indentation_level=1):
     # Choose a random statement type
-    statement_type = random.choice(["assignment", "conditional", "loop", "return"])
+    statement_type = random.choice(["assignment", "conditional", "loop", "return", "break"])
 
     if statement_type == "assignment":
         return generate_assignment_statement(indentation_level)
@@ -33,6 +33,8 @@ def generate_random_statement(indentation_level=1):
         return generate_loop_statement(indentation_level)
     elif statement_type == "return":
         return generate_return_statement(indentation_level)
+    elif statement_type == "break":
+        return generate_break_statement(indentation_level)
 
 def generate_assignment_statement(indentation_level):
     variable_name = f"var_{random.randint(1, 100)}"
@@ -73,14 +75,30 @@ def generate_complex_condition():
     return f"{left_operand} {operator} {right_operand}"
 
 def generate_return_statement(indentation_level):
-    returnOrBreak = random.randint(0, 1)
-    if returnOrBreak:
-        return_value = random.randint(1, 100)
-        indentation = "    " * indentation_level
-        return f"{indentation}return {return_value}"
-    else:
-        indentation = "    " * indentation_level
-        return f"{indentation}break"
+    return_value = random.randint(1, 100)
+    indentation = "    " * indentation_level
+    return f"{indentation}return {return_value}"
+
+def generate_break_statement(indentation_level):
+    indentation = "    " * (indentation_level + 1)
+    return f"{indentation}break"
+    # Split the function code into lines
+    # lines = function_code.splitlines()
+
+    # last_loop_indentation = 0
+    # # Iterate over the lines in reverse order to find the last for or while loop
+    # for i in range(len(lines) - 1, -1, -1):
+    #     line = lines[i].strip()
+    #     if line.startswith("for") or line.startswith("while"):
+    #         # Return the indentation level of the last loop
+    #         last_loop_indentation = (len(line) - len(line.lstrip())) // 4
+
+    # # Return None if no loops were found
+    # if last_loop_indentation == 0:
+    #     return None
+
+    # indentation = "    " * (last_loop_indentation - 1)
+    # return f"{indentation}break"
 
 
 def run_with_timeout(func, args=(), timeout=10):
@@ -112,6 +130,7 @@ for _ in range(100000):
     import time
 
     random_function = generate_random_function()
+    print(random_function)
     fn_name = re.findall(r'func_\w*', random_function)[0]
     start = time.perf_counter() * 1e9
     exec(random_function)
