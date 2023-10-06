@@ -73,110 +73,54 @@ def generate_complex_condition():
     return f"{left_operand} {operator} {right_operand}"
 
 def generate_return_statement(indentation_level):
-    return_value = random.randint(1, 100)
-    indentation = "    " * indentation_level
-    return f"{indentation}return {return_value}"
+    returnOrBreak = random.randint(0, 1)
+    if returnOrBreak:
+        return_value = random.randint(1, 100)
+        indentation = "    " * indentation_level
+        return f"{indentation}return {return_value}"
+    else:
+        indentation = "    " * indentation_level
+        return f"{indentation}break"
 
 
+def run_with_timeout(func, args=(), timeout=10):
+    import threading
+    
+    # Define a function to run the target function with a timeout
+    class InterruptableThread(threading.Thread):
+        def __init__(self):
+            threading.Thread.__init__(self)
+            self.result = None
 
-for _ in range(1):
+        def run(self):
+            self.result = func(*args)
+
+    # Start the thread and wait for the timeout
+    it = InterruptableThread()
+    it.start()
+    it.join(timeout)
+
+    # Check if the thread is still alive
+    if it.is_alive():
+        return False
+
+    # If the thread is not alive, return the result
+    return True
+
+for _ in range(100000):
     import re
-    import importlib
+    import time
 
     random_function = generate_random_function()
     fn_name = re.findall(r'func_\w*', random_function)[0]
-    with open(f"./checking.py", "w") as file:
-        file.write(random_function)
-
-    module = importlib.import_module("checking")
-    function = getattr(module, fn_name)
-    print(function)
-
-
-
-
-
-
-
-# def run_with_timeout(func, args=(), timeout=10):
-#     import threading
-    
-#     # Define a function to run the target function with a timeout
-#     class InterruptableThread(threading.Thread):
-#         def __init__(self):
-#             threading.Thread.__init__(self)
-#             self.result = None
-
-#         def run(self):
-#             self.result = func(*args)
-
-#     # Start the thread and wait for the timeout
-#     it = InterruptableThread()
-#     it.start()
-#     it.join(timeout)
-
-#     # Check if the thread is still alive
-#     if it.is_alive():
-#         # If it is, interrupt it and raise an exception
-#         it._Thread__stop()
-#         return False
-
-#     # If the thread is not alive, return the result
-#     return True
-
-# import threading
-
-
-
-# x = 0
-# while x < 1:
-#     function_code = generate_random_function()
-
-#     # Split the function code into a list of lines
-#     lines = function_code.splitlines()
-
-#     # Remove the first line
-#     lines = lines[1:]
-
-#     # Remove a tab from each line after the first
-#     for i in range(len(lines)):
-#         lines[i] = lines[i].replace('    ', '', 1)
-
-#         import re
-#         lines[i] = re.sub(r'return \d*', 'exit()', lines[i])
-
-#     # Join the modified lines back into a single string
-#     modified_code = '\n'.join(lines)
-
-#     class InterruptableThread(threading.Thread):
-#         def __init__(self):
-#             threading.Thread.__init__(self)
-#             self.result = None
-
-#         def run(self):
-#             self.result = eval(modified_code)
-
-#     # Start the thread and wait for the timeout
-#     it = InterruptableThread()
-#     it.start()
-#     it.join(10)
-
-#     # Check if the thread is still alive
-#     if it.is_alive():
-#         # If it is, interrupt it and raise an exception
-#         it._Thread__stop()
-        
-#         with open('check.txt', 'a') as file:
-#             file.write(function_code + '\n')
-#         print('might not halt')
-#     else:
-#         with open('functions.txt', 'a') as file:
-#             file.write(function_code + '\n<sep>\n')
-#         print('halts')
-
-
-#     x += 1
-
-
-# # with open("functions.txt", "a") as file:
-# #     file.write(random_function)
+    start = time.perf_counter() * 1e9
+    exec(random_function)
+    end = time.perf_counter() * 1e9
+    if run_with_timeout(eval(fn_name), timeout=3):
+        print(f"Function ran successfully in {end - start} nanoseconds")
+        # with open('functions.txt', 'a') as file:
+        #     file.write(random_function + '#1\n<sep>\n')
+    else:
+        print("Function timed out")
+        with open('checking.txt', 'a') as file:
+            file.write(random_function + '\n\n')

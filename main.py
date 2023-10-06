@@ -116,7 +116,7 @@ def main():
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
     model = createModel(max_length)
-    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=10000, batch_size=20)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=1000, batch_size=10)
     createConfusionMatrix(y_test, y_pred)
     seePredictions(X_test, y_test, y_pred, tokenizer)
 
