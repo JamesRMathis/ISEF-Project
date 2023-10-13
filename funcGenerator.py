@@ -1,6 +1,9 @@
 import random
 
+code = ''
+
 def generate_random_function():
+    global code
     # Generate a random function name
     function_name = "func_" + ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(5))
 
@@ -8,17 +11,13 @@ def generate_random_function():
     # num_parameters = random.randint(0, 3)
     # parameters = ', '.join([f'param_{i}' for i in range(num_parameters)])
 
-    # Combine the function definition with parameters
-    function_definition = f'def {function_name}():\n'
-
     # Generate function body with random statements (0-5 statements)
     num_statements = random.randint(3, 20)
-    statements = '\n'.join([generate_random_statement() for _ in range(num_statements)])
+    code += f'def {function_name}():\n'
+    for _ in range(num_statements):
+        code += generate_random_statement() + '\n'
 
-    # Combine everything to form the complete function
-    function_code = function_definition + f'{statements}\n'
-
-    return function_code
+    return code
 
 
 def generate_random_statement(indentation_level=1):
@@ -37,24 +36,50 @@ def generate_random_statement(indentation_level=1):
     #     return generate_break_statement(indentation_level)
 
 def generate_assignment_statement(indentation_level):
-    variable_name = f"var_{random.randint(1, 100)}"
-    value = random.randint(1, 100)
+    vars = re.findall(r'var_\d*', code)
+
+    new_var = random.choice([True, False])
+    if new_var or len(vars) == 0:
+        variable_name = f"var_{random.randint(1, 100)}"
+        value = random.randint(1, 100)
+        operator = '='
+    else:
+        variable_name = random.choice(vars)
+        value = random.randint(-999999, 999999)
+        operator = random.choice(["+=", "-=", "*=", "/="])
+
     indentation = "    " * indentation_level
-    return f"{indentation}{variable_name} = {value}"
+    return f"{indentation}{variable_name} {operator} {value}"
 
 def generate_conditional_statement(indentation_level):
-    boolean = random.randint(0, 1)
-    if boolean:
+    import re
+
+    basicCondition = random.choices([True, False], weights=[1, 3])[0]
+    if basicCondition:
         condition = random.choice(["True", "False"])
     else:
-        condition = generate_complex_condition()
+        vars = list(set(re.findall(r'var_\d*', code)))
+
+        if len(vars) == 0:
+            condition = generate_complex_condition()
+        elif len(vars) == 1:
+            condition = generate_complex_condition(left_operand=vars[0])
+        elif len(vars) == 2:
+            condition = generate_complex_condition(left_operand=vars[0], right_operand=vars[1])
+        else:
+            left_operand, right_operand = random.sample(vars, 2)
+            condition = generate_complex_condition(left_operand=left_operand, right_operand=right_operand)
+        
     indentation = "    " * indentation_level
-    return f"{indentation}if {condition}:\n{generate_random_statement(indentation_level + 1)}"
+    statements = [f'{indentation}if {condition}:']
+    for _ in range(random.randint(1, 3)):
+        statements.append(generate_random_statement(indentation_level + 1))
+    return '\n'.join(statements)
 
 def generate_loop_statement(indentation_level):
     indentation = "    " * indentation_level
     loop_type = random.choice(["for", "while"])
-    should_break = random.randint(0, 1)
+    should_break = random.choices([True, False], weights=[1, 3])[0]
     
     if loop_type == "for":
         loop_variable = f"i_{random.randint(1, 10)}"
@@ -63,21 +88,34 @@ def generate_loop_statement(indentation_level):
         statement += f"\n{generate_break_statement(statement)}" if should_break else ""
         return statement
     else:
-        boolean = random.randint(0, 1)
-        if boolean:
+        basicCondition = random.choices([True, False], weights=[1, 3])[0]
+        if basicCondition:
             condition = random.choice(["True", "False"])
         else:
-            condition = generate_complex_condition()
+            vars = list(set(re.findall(r'var_\d*', code)))
+        
+            if len(vars) == 0:
+                condition = generate_complex_condition()
+            elif len(vars) == 1:
+                condition = generate_complex_condition(left_operand=vars[0])
+            elif len(vars) == 2:
+                condition = generate_complex_condition(left_operand=vars[0], right_operand=vars[1] if random.choices([0, 1], [3, 1]) else None)
+            else:
+                left_operand, right_operand = random.sample(vars, 2)
+                condition = generate_complex_condition(left_operand=left_operand, right_operand=right_operand)
 
-        statement = f"{indentation}while {condition}:\n{generate_random_statement(indentation_level + 1)}"
-        statement += f"\n{generate_break_statement(statement)}" if should_break else ""
-        return statement
+        statements = [f'{indentation}while {condition}:']
+        for _ in range(random.randint(1, 3)):
+            statements.append(generate_random_statement(indentation_level + 1))
+        if should_break:
+            statements.append(generate_break_statement('\n'.join(statements)))
+        return '\n'.join(statements)
     
-def generate_complex_condition():
+def generate_complex_condition(left_operand=None, right_operand=None, operator=None):
     # Generate a random mathematical expression as a condition
-    left_operand = random.randint(-999999, 999999)
-    right_operand = random.randint(-999999, 999999)
-    operator = random.choice(["<", ">", "==", "!=", "<=", ">="])
+    left_operand = random.randint(-999999, 999999) if left_operand is None else left_operand
+    right_operand = random.randint(-999999, 999999) if right_operand is None else right_operand
+    operator = random.choice(["<", ">", "==", "!=", "<=", ">="]) if operator is None else operator
     return f"{left_operand} {operator} {right_operand}"
 
 def generate_return_statement(indentation_level):
@@ -131,18 +169,18 @@ def run_with_timeout(func, args=(), timeout=10):
     # If the thread is not alive, return the result
     return True
 
-for _ in range(1000):
+for _ in range(1):
     import re
     import time
 
     random_function = generate_random_function()
-    # print(random_function)
+    print(random_function)
     fn_name = re.findall(r'func_\w*', random_function)[0]
-    start = time.perf_counter() * 1e9
+    start = time.perf_counter() * 1000
     exec(random_function)
-    end = time.perf_counter() * 1e9
+    end = time.perf_counter() * 1000
     if run_with_timeout(eval(fn_name), timeout=3):
-        print(f"Function ran successfully in {end - start} nanoseconds")
+        print(f"Function ran successfully in {end - start} milliseconds")
         # with open('functions.txt', 'a') as file:
         #     file.write(random_function + '#1\n<sep>\n')
     else:
