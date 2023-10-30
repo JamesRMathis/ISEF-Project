@@ -68,7 +68,6 @@ def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='a
     
     # Compile and train the model
     import pickle
-    training = 1
     if training:
         # recall = Recall()
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy', 'Recall', 'Precision'])
@@ -116,7 +115,7 @@ def main():
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
     model = createModel(max_length)
-    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=1000, batch_size=10)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=1000, batch_size=300)
     createConfusionMatrix(y_test, y_pred)
     seePredictions(X_test, y_test, y_pred, tokenizer)
 
