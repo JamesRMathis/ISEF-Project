@@ -116,8 +116,9 @@ def main():
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
     model = createModel(max_length)
     y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=1000, batch_size=300)
-    createConfusionMatrix(y_test, y_pred)
-    seePredictions(X_test, y_test, y_pred, tokenizer)
+    # createConfusionMatrix(y_test, y_pred)
+    createConfusionMatrix(y_train, y_pred)
+    # seePredictions(X_test, y_test, y_pred, tokenizer)
 
 def optimize():
     functions, results = parseData()
@@ -127,8 +128,8 @@ def optimize():
 
     # Define the grid search parameters
     optimizers = ['adam', 'sgd', 'rmsprop']
-    epochs = [100, 500, 1000, 10000]
-    batch_sizes = [10, 20, 50, 100]
+    epochs = [val for val in range(100, 10000, 100)]
+    batch_sizes = [val for val in range(10, 1000, 10)]
 
     # Perform the grid search
     best_accuracy = 0
@@ -136,15 +137,24 @@ def optimize():
 
     model = createModel(max_length)
     for optimizer in optimizers:
-        for epoch in range(100, 10000, 100):
+        for epoch in epochs:
             for batch_size in batch_sizes:
                 print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}')
                 y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
                 loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
+
+                with open('test.csv', 'a') as f:
+                    f.write(f'{optimizer},{epoch},{batch_size},{accuracy}\n')
+
                 if accuracy > best_accuracy:
                     best_accuracy = accuracy
                     best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size}
 
+                y_pred = trainModel(model, X_train, y_train, X_train, y_train, optimizer=optimizer, epochs=epoch, batch_size=batch_size, training=0)
+                loss, accuracy, recall, precision = model.evaluate(X_train, y_train)
+                with open('train.csv', 'a') as f:
+                    f.write(f'{optimizer},{epoch},{batch_size},{accuracy}\n')
+
 if __name__ == '__main__':
-    main()
-    # optimize()
+    # main()
+    optimize()
