@@ -49,7 +49,7 @@ def splitData(padded_sequences, results):
 
     return X_train, y_train, X_test, y_test
 
-def createModel(max_length):
+def createModel(max_length, output_dim=5):
 
 
     # Define the model architecture
@@ -58,9 +58,10 @@ def createModel(max_length):
     from keras.metrics import Recall, Precision
 
     model = Sequential()
-    model.add(Embedding(input_dim=1000, output_dim=10, input_length=max_length))
+    model.add(Embedding(input_dim=1000, output_dim=output_dim, input_length=max_length))
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
+    # model.add(Dense(1, activation='sigmoid'))
 
     return model
 
@@ -115,12 +116,14 @@ def main():
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
     model = createModel(max_length)
-    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=1000, batch_size=300)
-    # createConfusionMatrix(y_test, y_pred)
-    createConfusionMatrix(y_train, y_pred)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=500, batch_size=300)
+    createConfusionMatrix(y_test, y_pred)
+    # createConfusionMatrix(y_train, y_pred)
     # seePredictions(X_test, y_test, y_pred, tokenizer)
 
 def optimize():
+    import itertools
+
     functions, results = parseData()
     functions, results = shuffleData(functions, results)
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
@@ -128,32 +131,39 @@ def optimize():
 
     # Define the grid search parameters
     optimizers = ['adam', 'sgd', 'rmsprop']
-    epochs = [val for val in range(100, 10000, 100)]
-    batch_sizes = [val for val in range(10, 1000, 10)]
+    epochs = [val for val in range(10, 10000, 10)]
+    batch_sizes = [val for val in range(100, 1000, 100)]
+    output_dims = [val for val in range(2, 15, 2)]
 
     # Perform the grid search
     best_accuracy = 0
     best_params = {}
 
-    model = createModel(max_length)
-    for optimizer in optimizers:
-        for epoch in epochs:
-            for batch_size in batch_sizes:
-                print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}')
-                y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
-                loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
+    prevTestAccuracy = 0
+    prevTrainAccuracy = 0
+    for optimizer, epoch, batch_size, output_dim in itertools.product(optimizers, epochs, batch_sizes, output_dims):
+        model = createModel(max_length, output_dim=output_dim)
+        print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}, output_dim: {output_dim}')
+        y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
+        loss, testAccuracy, recall, precision = model.evaluate(X_test, y_test)
+        # createConfusionMatrix(y_test, y_pred)
 
-                with open('test.csv', 'a') as f:
-                    f.write(f'{optimizer},{epoch},{batch_size},{accuracy}\n')
+        with open('test.csv', 'a') as f:
+            f.write(f'{optimizer},{epoch},{batch_size},{output_dim},{testAccuracy}\n')
 
-                if accuracy > best_accuracy:
-                    best_accuracy = accuracy
-                    best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size}
+        if testAccuracy > best_accuracy:
+            best_accuracy = testAccuracy
+            best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size, 'output_dim': output_dim}
 
-                y_pred = trainModel(model, X_train, y_train, X_train, y_train, optimizer=optimizer, epochs=epoch, batch_size=batch_size, training=0)
-                loss, accuracy, recall, precision = model.evaluate(X_train, y_train)
-                with open('train.csv', 'a') as f:
-                    f.write(f'{optimizer},{epoch},{batch_size},{accuracy}\n')
+        model = createModel(max_length, output_dim=output_dim)
+        y_pred = trainModel(model, X_train, y_train, X_train, y_train, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
+        loss, trainAccuracy, recall, precision = model.evaluate(X_train, y_train)
+        # createConfusionMatrix(y_train, y_pred)
+        with open('train.csv', 'a') as f:
+            f.write(f'{optimizer},{epoch},{batch_size},{output_dim},{trainAccuracy}\n')
+
+        if trainAccuracy < prevTrainAccuracy:
+            break
 
 if __name__ == '__main__':
     # main()
