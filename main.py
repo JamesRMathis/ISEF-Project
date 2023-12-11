@@ -1,5 +1,5 @@
 def parseData():
-    file = open(r'C:\Users\James\Documents\Code\School\ISEF Project\functions.txt', 'r').read()
+    file = open(r'/home/james/Code/School/ISEF Project/functions.txt', 'r').read()
 
     functions = file.split('\n<sep>\n')
     results = []
@@ -115,8 +115,8 @@ def main():
     functions, results = shuffleData(functions, results)
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
-    model = createModel(max_length)
-    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=500, batch_size=300)
+    model = createModel(max_length, 10)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='adam', epochs=450, batch_size=900)
     createConfusionMatrix(y_test, y_pred)
     # createConfusionMatrix(y_train, y_pred)
     # seePredictions(X_test, y_test, y_pred, tokenizer)
@@ -141,6 +141,7 @@ def optimize():
 
     prevTestAccuracy = 0
     prevTrainAccuracy = 0
+    print('optimizer,epochs,batch_size,output_dim,accuracy')
     for optimizer, epoch, batch_size, output_dim in itertools.product(optimizers, epochs, batch_sizes, output_dims):
         model = createModel(max_length, output_dim=output_dim)
         print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}, output_dim: {output_dim}')
@@ -166,5 +167,5 @@ def optimize():
             break
 
 if __name__ == '__main__':
-    # main()
-    optimize()
+    main()
+    # optimize()
