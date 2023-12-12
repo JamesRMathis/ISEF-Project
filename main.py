@@ -1,5 +1,5 @@
 def parseData():
-    file = open(r'/home/james/Code/School/ISEF Project/functions.txt', 'r').read()
+    file = open('functions.txt', 'r').read()
 
     functions = file.split('\n<sep>\n')
     results = []
@@ -131,9 +131,9 @@ def optimize():
 
     # Define the grid search parameters
     optimizers = ['adam', 'sgd', 'rmsprop']
-    epochs = [val for val in range(10, 10000, 10)]
-    batch_sizes = [val for val in range(100, 1000, 100)]
-    output_dims = [val for val in range(2, 15, 2)]
+    epochs = [val for val in range(100, 1000, 100)]
+    batch_sizes = [val for val in range(5, 200, 5)]
+    output_dims = [val for val in range(5, 200, 5)]
 
     # Perform the grid search
     best_accuracy = 0
@@ -165,6 +165,7 @@ def optimize():
 
         if trainAccuracy < prevTrainAccuracy:
             break
+    print(f'best accuracy: {best_accuracy}, best params: {best_params}')
 
 if __name__ == '__main__':
     main()
