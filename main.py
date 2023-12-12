@@ -141,31 +141,41 @@ def optimize():
 
     prevTestAccuracy = 0
     prevTrainAccuracy = 0
-    print('optimizer,epochs,batch_size,output_dim,accuracy')
+    open('test.csv', 'w').write('optimizer,epochs,batch_size,output_dim,avgAccuracy\n')
+    open('train.csv', 'w').write('optimizer,epochs,batch_size,output_dim,avgAccuracy\n')
     for optimizer, epoch, batch_size, output_dim in itertools.product(optimizers, epochs, batch_sizes, output_dims):
         model = createModel(max_length, output_dim=output_dim)
         print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}, output_dim: {output_dim}')
-        y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
-        loss, testAccuracy, recall, precision = model.evaluate(X_test, y_test)
+        accuracies = []
+        for i in range(10):
+            print(f'iteration: {i}')
+            y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
+            loss, testAccuracy, recall, precision = model.evaluate(X_test, y_test)
+            accuracies.append(testAccuracy)
+        avgAccuracy = sum(accuracies) / len(accuracies)
         # createConfusionMatrix(y_test, y_pred)
 
         with open('test.csv', 'a') as f:
-            f.write(f'{optimizer},{epoch},{batch_size},{output_dim},{testAccuracy}\n')
+            f.write(f'{optimizer},{epoch},{batch_size},{output_dim},{avgAccuracy}\n')
 
-        if testAccuracy > best_accuracy:
+        if avgAccuracy > best_accuracy:
             best_accuracy = testAccuracy
             best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size, 'output_dim': output_dim}
 
-        model = createModel(max_length, output_dim=output_dim)
-        y_pred = trainModel(model, X_train, y_train, X_train, y_train, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
-        loss, trainAccuracy, recall, precision = model.evaluate(X_train, y_train)
-        # createConfusionMatrix(y_train, y_pred)
+        accuracies = []
+        for i in range(10):
+            print(f'iteration: {i}')
+            y_pred = trainModel(model, X_train, y_train, X_train, y_train, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
+            loss, trainAccuracy, recall, precision = model.evaluate(X_train, y_train)
+            accuracies.append(trainAccuracy)
+        
+        avgAccuracy = sum(accuracies) / len(accuracies)
         with open('train.csv', 'a') as f:
-            f.write(f'{optimizer},{epoch},{batch_size},{output_dim},{trainAccuracy}\n')
+            f.write(f'{optimizer},{epoch},{batch_size},{output_dim},{avgAccuracy}\n')
 
         if trainAccuracy < prevTrainAccuracy:
             break
 
 if __name__ == '__main__':
-    main()
-    # optimize()
+    # main()
+    optimize()
