@@ -1,3 +1,17 @@
+from keras.models import Sequential
+from keras.layers import Embedding, Flatten, Dense
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from scikeras.wrappers import KerasClassifier
+from sklearn.model_selection import GridSearchCV
+
+import random
+import numpy as np
+import pickle
+import itertools
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from matplotlib import pyplot as plt
+
 def parseData():
     file = open('functions.txt', 'r').read()
 
@@ -12,34 +26,25 @@ def parseData():
     return functions, results
 
 def shuffleData(functions, results):
-    # Shuffle the data
-    import random
-
     data = list(zip(functions, results))
     random.shuffle(data)
     funcs, res = zip(*data)
     return funcs, res
 
 def tokenizeData(functions):
-    
     # Tokenize the data
-    from keras.preprocessing.text import Tokenizer
-
     tokenizer = Tokenizer(num_words=1000)
     tokenizer.fit_on_texts(functions)
     sequences = tokenizer.texts_to_sequences(functions)
 
     # Pad the sequences to a fixed length
-    from keras.preprocessing.sequence import pad_sequences
-
-    max_length = 100
+    max_length = 500
     padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
 
     return sequences, padded_sequences, max_length, tokenizer
 
 def splitData(padded_sequences, results):
     # Split the data into training and testing sets
-    import numpy as np
 
     split_index = int(len(padded_sequences) * 2 / 3)
     X_train = padded_sequences[:split_index]
@@ -49,26 +54,29 @@ def splitData(padded_sequences, results):
 
     return X_train, y_train, X_test, y_test
 
-def createModel(max_length, output_dim=5):
+# def createModel(max_length, output_dim=5):
+#     # Define the model architecture
+#     model = Sequential()
+#     model.add(Embedding(input_dim=1000, output_dim=output_dim, input_length=max_length))
+#     model.add(Flatten())
+#     model.add(Dense(1, activation='sigmoid'))
 
+#     return model
 
+def createModel(optimizer='adam', output_dim=5, activation='sigmoid'):
     # Define the model architecture
-    from keras.models import Sequential
-    from keras.layers import Embedding, Flatten, Dense
-    from keras.metrics import Recall, Precision
-
     model = Sequential()
-    model.add(Embedding(input_dim=1000, output_dim=output_dim, input_length=max_length))
+    model.add(Embedding(input_dim=1000, output_dim=output_dim))
     model.add(Flatten())
-    model.add(Dense(1, activation='sigmoid'))
-    # model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(1, activation=activation))
+
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'Recall', 'Precision'])
 
     return model
 
 def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='adam', epochs=1000, batch_size=50):
     
     # Compile and train the model
-    import pickle
     if training:
         # recall = Recall()
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy', 'Recall', 'Precision'])
@@ -93,8 +101,6 @@ def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='a
     return y_pred
 
 def createConfusionMatrix(y_test, y_pred):
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-    from matplotlib import pyplot as plt
     cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
     disp = ConfusionMatrixDisplay(cm, display_labels=['doesnt halt', 'halts'])
     disp.plot(cmap=plt.cm.Reds)
@@ -122,7 +128,6 @@ def main():
     # seePredictions(X_test, y_test, y_pred, tokenizer)
 
 def optimize():
-    import itertools
 
     functions, results = parseData()
     functions, results = shuffleData(functions, results)
@@ -168,5 +173,24 @@ def optimize():
     print(f'best accuracy: {best_accuracy}, best params: {best_params}')
 
 if __name__ == '__main__':
-    main()
+    # main()
     # optimize()
+
+    functions, results = parseData()
+    functions, results = shuffleData(functions, results)
+    sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
+    X, Y = padded_sequences, np.array(results)
+
+    model = KerasClassifier(createModel, verbose=0)
+    param_grid = {
+        'optimizer': ['adam', 'sgd', 'rmsprop'],
+        'epochs': [val for val in range(100, 1000, 100)],
+        'batch_size': [val for val in range(5, 200, 5)],
+        'output_dim': [val for val in range(5, 200, 5)]
+    }
+    grid = GridSearchCV(model, param_grid, cv=3, verbose=1)
+    grid.fit(X, Y)
+
+    print(grid.best_params_)
+    print(grid.best_score_)
+    print(grid.best_estimator_)
