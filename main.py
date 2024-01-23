@@ -1,7 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Embedding, Flatten, Dense
 from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
+from keras.utils import pad_sequences
 from scikeras.wrappers import KerasClassifier
 from sklearn.model_selection import GridSearchCV
 
@@ -9,8 +9,8 @@ import random
 import numpy as np
 import pickle
 import itertools
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from matplotlib import pyplot as plt
+
+# from matplotlib import pyplot as plt
 
 def parseData():
     file = open('functions.txt', 'r').read()
@@ -66,7 +66,7 @@ def splitData(padded_sequences, results):
 def createModel(optimizer='adam', output_dim=5, activation='sigmoid'):
     # Define the model architecture
     model = Sequential()
-    model.add(Embedding(input_dim=1000, output_dim=output_dim))
+    model.add(Embedding(input_dim=1000, output_dim=output_dim, input_length=500))
     model.add(Flatten())
     model.add(Dense(1, activation=activation))
 
@@ -100,11 +100,11 @@ def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='a
 
     return y_pred
 
-def createConfusionMatrix(y_test, y_pred):
-    cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
-    disp = ConfusionMatrixDisplay(cm, display_labels=['doesnt halt', 'halts'])
-    disp.plot(cmap=plt.cm.Reds)
-    plt.show()
+# def createConfusionMatrix(y_test, y_pred):
+#     cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
+#     disp = ConfusionMatrixDisplay(cm, display_labels=['doesnt halt', 'halts'])
+#     disp.plot(cmap=plt.cm.Reds)
+#     plt.show()
 
 def seePredictions(X_test, y_test, y_pred,  tokenizer):
 
@@ -190,17 +190,27 @@ if __name__ == '__main__':
     functions, results = shuffleData(functions, results)
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X, Y = padded_sequences, np.array(results)
+    print(X, Y)
 
-    model = KerasClassifier(createModel, verbose=0)
+    model = KerasClassifier(createModel, output_dim=5, verbose=0)
+    print('model created')
     param_grid = {
         'optimizer': ['adam', 'sgd', 'rmsprop'],
-        'epochs': [val for val in range(100, 1000, 100)],
-        'batch_size': [val for val in range(5, 200, 5)],
-        'output_dim': [val for val in range(5, 200, 5)]
+        'epochs': [val for val in range(100, 501, 100)],
+        # 'batch_size': [val for val in range(20, 201, 20)],
+        'batch_size': [8],
+        'output_dim': [val for val in range(20, 101, 20)]
     }
-    grid = GridSearchCV(model, param_grid, cv=3, verbose=1)
+    # smaller grid for debug
+    # param_grid = {
+    #     'optimizer': ['adam', 'sgd', 'rmsprop'],
+    #     'epochs': [val for val in range(100, 201, 100)],
+    #     'batch_size': [val for val in range(5, 11, 5)],
+    #     'output_dim': [val for val in range(5, 11, 5)]
+    # }
+    grid = GridSearchCV(model, param_grid, cv=5, verbose=2, scoring='accuracy', n_jobs=4)
     grid.fit(X, Y)
 
     print(grid.best_params_)
     print(grid.best_score_)
-    print(grid.best_estimator_)
+    # print(grid.best_estimator_)
