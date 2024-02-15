@@ -1,5 +1,20 @@
+from keras.models import Sequential
+from keras.layers import Embedding, Flatten, Dense
+from keras.preprocessing.text import Tokenizer
+from keras.utils import pad_sequences
+from keras.utils import pad_sequences
+from scikeras.wrappers import KerasClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+import random
+import numpy as np
+import pickle
+
+from matplotlib import pyplot as plt
+
 def parseData():
-    file = open(r'C:\Users\James\Documents\Code\School\ISEF Project\functions.txt', 'r').read()
+    file = open('functions.txt', 'r').read()
 
     functions = file.split('\n<sep>\n')
     results = []
@@ -8,38 +23,30 @@ def parseData():
             if line.startswith('#'):
                 results.append(int(line[1:].strip()))
                 functions[i] = functions[i].replace(line, '')
-    
+
+    print(len(functions))
     return functions, results
 
 def shuffleData(functions, results):
-    # Shuffle the data
-    import random
-
     data = list(zip(functions, results))
     random.shuffle(data)
     funcs, res = zip(*data)
     return funcs, res
 
 def tokenizeData(functions):
-    
     # Tokenize the data
-    from keras.preprocessing.text import Tokenizer
-
     tokenizer = Tokenizer(num_words=1000)
     tokenizer.fit_on_texts(functions)
     sequences = tokenizer.texts_to_sequences(functions)
 
     # Pad the sequences to a fixed length
-    from keras.preprocessing.sequence import pad_sequences
-
-    max_length = 100
+    max_length = 500
     padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
 
     return sequences, padded_sequences, max_length, tokenizer
 
 def splitData(padded_sequences, results):
     # Split the data into training and testing sets
-    import numpy as np
 
     split_index = int(len(padded_sequences) * 2 / 3)
     X_train = padded_sequences[:split_index]
@@ -49,26 +56,20 @@ def splitData(padded_sequences, results):
 
     return X_train, y_train, X_test, y_test
 
-def createModel(max_length):
-
-
+def createModel(optimizer='adam', output_dim=5, activation='sigmoid'):
     # Define the model architecture
-    from keras.models import Sequential
-    from keras.layers import Embedding, Flatten, Dense
-    from keras.metrics import Recall, Precision
-
     model = Sequential()
-    model.add(Embedding(input_dim=1000, output_dim=10, input_length=max_length))
+    model.add(Embedding(input_dim=1000, output_dim=output_dim, input_length=500, input_length=500))
     model.add(Flatten())
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(1, activation=activation))
+
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'Recall', 'Precision'])
 
     return model
 
 def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='adam', epochs=1000, batch_size=50):
-    
+
     # Compile and train the model
-    import pickle
-    training = 1
     if training:
         # recall = Recall()
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy', 'Recall', 'Precision'])
@@ -86,19 +87,18 @@ def trainModel(model, X_train, y_train, X_test, y_test, training=1, optimizer='a
 
     # Evaluate the model
     loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
+    # return loss, accuracy, recall, precision
 
     y_pred = model.predict(X_test)
     y_pred = (y_pred > 0.5)
 
     return y_pred
 
-def createConfusionMatrix(y_test, y_pred):
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-    from matplotlib import pyplot as plt
-    cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
-    disp = ConfusionMatrixDisplay(cm, display_labels=['doesnt halt', 'halts'])
-    disp.plot(cmap=plt.cm.Reds)
-    plt.show()
+# def createConfusionMatrix(y_test, y_pred):
+#     cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
+#     disp = ConfusionMatrixDisplay(cm, display_labels=['doesnt halt', 'halts'])
+#     disp.plot(cmap=plt.cm.Reds)
+#     plt.show()
 
 def seePredictions(X_test, y_test, y_pred,  tokenizer):
 
@@ -115,37 +115,58 @@ def main():
     functions, results = shuffleData(functions, results)
     sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
     X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
-    model = createModel(max_length)
-    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='sgd', epochs=1000, batch_size=10)
+
+    # lossList, accList, recList, precList = [], [], [], []
+    # for i in range(100):
+    #   model = createModel(max_length, 20)
+    #   loss, acc, rec, prec = trainModel(model, X_train, y_train, X_test, y_test, optimizer='rmsprop', epochs=200, batch_size=64)
+    #   with open('output.csv', 'a') as f:
+    #     f.write(f'{loss}, {acc}, {rec}, {prec}\n')
+    #   lossList.append(loss)
+    #   accList.append(acc)
+    #   recList.append(rec)
+    #   precList.append(prec)
+    # avgLoss = sum(lossList) / len(lossList)
+    # avgAcc = sum(accList) / len(accList)
+    # avgRec = sum(recList) / len(recList)
+    # avgPrec = sum(precList) / len(precList)
+    # print(f'avgLoss: {avgLoss}, avgAcc: {avgAcc}, avgRec: {avgRec}, avgPrec: {avgPrec}')
+    model = createModel(max_length, 20)
+    y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer='rmsprop', epochs=200, batch_size=64)
     createConfusionMatrix(y_test, y_pred)
-    seePredictions(X_test, y_test, y_pred, tokenizer)
-
-def optimize():
-    functions, results = parseData()
-    functions, results = shuffleData(functions, results)
-    sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
-    X_train, y_train, X_test, y_test = splitData(padded_sequences, results)
-
-    # Define the grid search parameters
-    optimizers = ['adam', 'sgd', 'rmsprop']
-    epochs = [100, 500, 1000, 10000]
-    batch_sizes = [10, 20, 50, 100]
-
-    # Perform the grid search
-    best_accuracy = 0
-    best_params = {}
-
-    model = createModel(max_length)
-    for optimizer in optimizers:
-        for epoch in range(100, 10000, 100):
-            for batch_size in batch_sizes:
-                print(f'optimizer: {optimizer}, epochs: {epoch}, batch_size: {batch_size}')
-                y_pred = trainModel(model, X_train, y_train, X_test, y_test, optimizer=optimizer, epochs=epoch, batch_size=batch_size)
-                loss, accuracy, recall, precision = model.evaluate(X_test, y_test)
-                if accuracy > best_accuracy:
-                    best_accuracy = accuracy
-                    best_params = {'optimizer': optimizer, 'epochs': epoch, 'batch_size': batch_size}
+    # createConfusionMatrix(y_train, y_pred)
+    # seePredictions(X_test, y_test, y_pred, tokenizer)
 
 if __name__ == '__main__':
     main()
     # optimize()
+
+    # functions, results = parseData()
+    # functions, results = shuffleData(functions, results)
+    # sequences, padded_sequences, max_length, tokenizer = tokenizeData(functions)
+    # X, Y = padded_sequences, np.array(results)
+    # print(X, Y)
+
+    # model = KerasClassifier(createModel, output_dim=5, verbose=0)
+    # print('model created')
+    # param_grid = {
+    #     'optimizer': ['adam', 'sgd', 'rmsprop'],
+    #     'epochs': [val for val in range(100, 501, 100)],
+    #     # 'batch_size': [val for val in range(20, 201, 20)],
+    #     'batch_size': [2**i for i in range(5, 8)],
+    #     'output_dim': [val for val in range(20, 101, 20)]
+    # }
+    # print(param_grid)
+    # # smaller grid for debug
+    # param_grid = {
+    #     'optimizer': ['adam', 'sgd', 'rmsprop'],
+    #     'epochs': [val for val in range(100, 201, 100)],
+    #     'batch_size': [val for val in range(5, 11, 5)],
+    #     'output_dim': [val for val in range(5, 11, 5)]
+    # }
+    # grid = GridSearchCV(model, param_grid, cv=3, verbose=1, scoring='accuracy', n_jobs=-1)
+    # grid.fit(X, Y)
+
+    print(grid.best_params_)
+    print(grid.best_score_)
+    print(grid.best_estimator_)

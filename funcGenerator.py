@@ -169,7 +169,8 @@ def run_with_timeout(func, args=(), timeout=10):
     # If the thread is not alive, return the result
     return True
 
-for _ in range(1):
+functions = []
+for i in range(1000):
     import re
     import time
 
@@ -177,13 +178,28 @@ for _ in range(1):
     print(random_function)
     fn_name = re.findall(r'func_\w*', random_function)[0]
     start = time.perf_counter() * 1000
+    start = time.perf_counter() * 1000
     exec(random_function)
     end = time.perf_counter() * 1000
+    end = time.perf_counter() * 1000
     if run_with_timeout(eval(fn_name), timeout=3):
-        print(f"Function ran successfully in {end - start} milliseconds")
+        print(f"Function {i} ran successfully in {end - start} milliseconds")
+        if len(functions) % 2 == 0:
+            functions.append(random_function)
+            
         # with open('functions.txt', 'a') as file:
         #     file.write(random_function + '#1\n<sep>\n')
     else:
-        print("Function timed out")
+        print(f"Function {i} timed out")
+        functions.append(random_function)
+        # with open('checking.txt', 'a') as file:
+        #     file.write(random_function + '\n\n')
+
+for i, func in enumerate(functions):
+    if i % 2 == 0:
+        # ...
+        with open('functions.txt', 'a') as file:
+            file.write(func + '#1\n<sep>\n')
+    else:
         with open('checking.txt', 'a') as file:
-            file.write(random_function + '\n\n')
+            file.write(func + '\n')

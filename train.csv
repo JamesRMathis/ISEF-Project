@@ -1,0 +1,3 @@
+optimizer,epochs,batch_size,output_dim,avgAccuracy
+adam,10,5,5,1.0
+adam,10,5,10,1.0
