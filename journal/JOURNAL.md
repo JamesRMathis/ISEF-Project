@@ -26,14 +26,6 @@ I found a [research paper by CS Calude and Stay MA](https://www.sciencedirect.co
 
 I realized that I was using the exec function entirely wrong. After discovering this, I made the loop to check if the function timed out or not and write it to its corresponding file. I'm also using regex to figure out the name of the function from the string. This is necessary in order to call the function as I cannot assign it to a variable. It results in somewhat ugly code, but I don't see any other solution. The functions are also being timed as they ran. I believe I could find some use for this data in the future.
 
-I also pushed my code to a Github repository. It can be found with the following QR code:
-
-<center>
-
-<img src="github.png" width="200">
-
-</center>
-
 ## 10/5/23
 
 I'm trying to add the break keyword to the functions but that is proving much more difficult than I thought. I have to make sure that the break is actually contained within a loop, but the structure of my program is making this difficult. The functions that generate random statements are all designed to work independently from each other but I need to know the context of the break statement in order to determine whether it is valid or not. I'm going to have to rethink the structure of my program.
@@ -204,7 +196,10 @@ I summarized the Introduction and Conclusion sections of the paper and put them 
 ## 2/12/24
 I made some final edits to my poster and submitted it to Mr. Seward for review. He said it looked good, so I'm finished with it.
 
-Here is the final version of my poster:
+My code, paper, and poster can be found on Github with the following QR code:
 
-![Poster](posterPage1Final.png)
-![Poster](posterPage2Final.png)
+<center>
+
+<img src="github.png" width="200">
+
+</center>
